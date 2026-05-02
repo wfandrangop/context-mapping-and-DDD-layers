@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-Content -Raw 'C:\\\\Users\\\\DARIO\\\\Desktop\\\\Kennet\\\\Universidad\\\\Séptimo Semestre\\\\Arquitectura de Software\\\\context-mapping-and-DDD-layers\\\\backend\\\\.gitattributes' | Format-Hex\")"
+    ]
+  }
+}
