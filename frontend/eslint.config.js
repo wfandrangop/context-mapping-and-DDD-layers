@@ -52,6 +52,14 @@ export default [
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
       'no-var': 'error',
+
+      'max-lines-per-function': ['error', { max: 20, skipBlankLines: true, skipComments: true }],
+      'max-params': ['error', 3],
+      // decision points: if, &&, ||, ternary, loops
+      complexity: ['error', 5],
+      'max-depth': ['error', 2],
+      'no-magic-numbers': ['error', { ignore: [-1, 0, 1], ignoreArrayIndexes: true, enforceConst: true }],
+
       'prettier/prettier': 'error',
     },
   },
