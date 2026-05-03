@@ -64,7 +64,11 @@ public class ServiceOrderController {
     }
 
     @PutMapping("/{id}/complete")
-    public ResponseEntity<ServiceOrderResponse> completeOrder(@PathVariable UUID id) {
-        return ResponseEntity.ok(ServiceOrderResponse.from(service.completeOrder(id)));
+    public ResponseEntity<ServiceOrderResponse> completeOrder(
+            @PathVariable UUID id,
+            @RequestBody CompleteOrderRequest request) {
+        return ResponseEntity.ok(ServiceOrderResponse.from(
+                service.completeOrder(id, request.clientRating(), request.clientComment())
+        ));
     }
 }
