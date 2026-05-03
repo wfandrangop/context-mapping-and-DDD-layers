@@ -9,9 +9,14 @@ import java.util.UUID;
  * Parameter Object for TradeReputation construction.
  * Encapsulates all required data for creating a TradeReputation aggregate.
  */
-record TradeReputationData(UUID id, String profileId, ConfidenceScore confidenceScore, 
-                           Set<Badge> badges, ComplianceMetrics complianceMetrics, 
-                           List<Review> reviews) {
+public record TradeReputationData(
+        UUID id,
+        String profileId,
+        ConfidenceScore confidenceScore,
+        Set<Badge> badges,
+        ComplianceMetrics complianceMetrics,
+        List<Review> reviews
+) {
     
     public TradeReputationData {
         Objects.requireNonNull(id, "Reputation id is required");

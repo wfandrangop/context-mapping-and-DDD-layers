@@ -1,8 +1,8 @@
 package com.veritrabajo.backend.reputation.domain.model;
 
-import com.veritrabajo.backend.reputation.event.BadgeAwarded;
-import com.veritrabajo.backend.reputation.event.ReputationUpdated;
-import com.veritrabajo.backend.reputation.event.ReputationUpdateData;
+import com.veritrabajo.backend.reputation.domain.event.BadgeAwarded;
+import com.veritrabajo.backend.reputation.domain.event.ReputationUpdateData;
+import com.veritrabajo.backend.reputation.domain.event.ReputationUpdated;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -49,6 +49,11 @@ public final class TradeReputation {
         ));
     }
 
+    public static TradeReputation rehydrate(TradeReputationData data) {
+        Objects.requireNonNull(data, "Trade reputation data is required");
+        return new TradeReputation(data);
+    }
+
     public UUID id() {
         return id;
     }
@@ -79,7 +84,7 @@ public final class TradeReputation {
         ConfidenceScore previousScore = this.confidenceScore;
         this.confidenceScore = newScore;
 
-        ReputationUpdateData data = new ReputationUpdateData(id, profileId, previousScore, 
+        ReputationUpdateData data = new ReputationUpdateData(id, profileId, previousScore,
                 newScore);
         return new ReputationUpdated(data);
     }
@@ -115,4 +120,3 @@ public final class TradeReputation {
                 confidenceScore + "}";
     }
 }
-

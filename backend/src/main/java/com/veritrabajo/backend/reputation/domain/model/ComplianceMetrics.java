@@ -10,7 +10,7 @@ public final class ComplianceMetrics {
 
     private final int successfulJobs;
     private final int cancelledJobs;
-    private static final double PERCENTAJE_100 = 100.0f;
+    private static final double PERCENTAGE_SCALE = 100.0;
 
     private ComplianceMetrics(int successfulJobs, int cancelledJobs) {
         this.successfulJobs = successfulJobs;
@@ -45,7 +45,25 @@ public final class ComplianceMetrics {
         if (total == 0) {
             return 0.0;
         }
-        return (successfulJobs * PERCENTAJE_100) / total;
+        return (successfulJobs * PERCENTAGE_SCALE) / total;
+    }
+
+    /**
+     * Returns a new ComplianceMetrics with one additional successful job recorded.
+     *
+     * @return new metrics instance with incremented successful jobs count
+     */
+    public ComplianceMetrics withSuccessfulJob() {
+        return new ComplianceMetrics(successfulJobs + 1, cancelledJobs);
+    }
+
+    /**
+     * Returns a new ComplianceMetrics with one additional cancelled job recorded.
+     *
+     * @return new metrics instance with incremented cancelled jobs count
+     */
+    public ComplianceMetrics withCancelledJob() {
+        return new ComplianceMetrics(successfulJobs, cancelledJobs + 1);
     }
 
     @Override

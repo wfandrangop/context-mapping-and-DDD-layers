@@ -1,4 +1,4 @@
-package com.veritrabajo.backend.reputation.event;
+package com.veritrabajo.backend.reputation.domain.event;
 
 import com.veritrabajo.backend.reputation.domain.model.Badge;
 
@@ -7,7 +7,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Domain event published when a badge is awarded to a professional.
+ * Domain event raised when a badge is awarded to a trade professional.
+ * This event is internal to the reputation bounded context.
  */
 public record BadgeAwarded(
     UUID reputationId,

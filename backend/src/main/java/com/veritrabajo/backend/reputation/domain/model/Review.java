@@ -26,6 +26,10 @@ public final class Review {
         return new Review(UUID.randomUUID(), comment, rating);
     }
 
+    public static Review rehydrate(UUID id, String comment, int rating) {
+        return new Review(id, comment, rating);
+    }
+
     public UUID id() {
         return id;
     }

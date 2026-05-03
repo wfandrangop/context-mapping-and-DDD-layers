@@ -1,5 +1,4 @@
 services:
-
   frontend:
     build:
       context: ./frontend
@@ -18,6 +17,24 @@ services:
     networks:
       - veritrabajo-network
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: veritrabajo-postgres
+    environment:
+      - POSTGRES_DB=veritrabajo
+      - POSTGRES_USER=veritrabajo
+      - POSTGRES_PASSWORD=veritrabajo
+    ports:
+      - "5432:5432"
+    volumes:
+      - veritrabajo-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veritrabajo -d veritrabajo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - veritrabajo-network
 
   backend:
     build:
@@ -29,10 +46,20 @@ services:
     environment:
       - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
       - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/veritrabajo
+      - SPRING_DATASOURCE_USERNAME=veritrabajo
+      - SPRING_DATASOURCE_PASSWORD=veritrabajo
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=false
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - veritrabajo-network
-
 
 networks:
   veritrabajo-network:
     driver: bridge
+
+volumes:
+  veritrabajo-postgres-data:

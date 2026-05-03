@@ -1,4 +1,4 @@
-package com.veritrabajo.backend.reputation.event;
+package com.veritrabajo.backend.reputation.domain.event;
 
 import com.veritrabajo.backend.reputation.domain.model.ConfidenceScore;
 
@@ -7,12 +7,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Domain event published when a reputation score is updated.
+ * Domain event raised when a trade professional's reputation score changes.
+ * This event is internal to the reputation bounded context.
  */
-public record ReputationUpdated(UUID reputationId, String profileId, ConfidenceScore previousScore,
-                                ConfidenceScore currentScore, Instant occurredAt) {
+public record ReputationUpdated(UUID reputationId, String profileId,
+                                ConfidenceScore previousScore,
+                                ConfidenceScore currentScore,
+                                Instant occurredAt) {
     public ReputationUpdated(ReputationUpdateData data) {
-        this(data.reputationId(), data.profileId(), data.previousScore(), 
+        this(data.reputationId(), data.profileId(), data.previousScore(),
              data.currentScore(), Instant.now());
     }
 
