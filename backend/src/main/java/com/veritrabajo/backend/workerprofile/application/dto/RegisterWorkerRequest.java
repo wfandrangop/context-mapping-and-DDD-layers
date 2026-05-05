@@ -3,9 +3,7 @@ package com.veritrabajo.backend.workerprofile.application.dto;
 import java.util.List;
 
 /**
- * DTO (Data Transfer Object) que representa los datos
- * que llegan desde el frontend al endpoint POST /api/profiles.
- * Solo transporta datos, sin lógica de dominio.
+ * Request payload for {@code POST /api/profiles}. Pure data transfer; no domain logic.
  */
 public class RegisterWorkerRequest {
 

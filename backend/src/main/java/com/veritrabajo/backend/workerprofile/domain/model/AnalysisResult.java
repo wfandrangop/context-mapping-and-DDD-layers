@@ -4,16 +4,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Objeto que encapsula el resultado del análisis de IA.
- * Transporta los oficios y habilidades extraídos
- * desde la descripción bruta del trabajador.
+ * Structured outcome of AI analysis: inferred occupations and technical skills.
  */
 public final class AnalysisResult {
 
     private final List<Occupation> occupations;
     private final List<TechnicalSkill> technicalSkills;
 
-    // Constructor privado para forzar el uso del método factory
     private AnalysisResult(
             List<Occupation> occupations,
             List<TechnicalSkill> technicalSkills
@@ -22,22 +19,18 @@ public final class AnalysisResult {
         this.technicalSkills = Collections.unmodifiableList(technicalSkills);
     }
 
-    /**
-     * Crea un resultado de análisis validado.
-     * Lanza excepción si alguna lista es nula.
-     */
     public static AnalysisResult of(
             List<Occupation> occupations,
             List<TechnicalSkill> technicalSkills
     ) {
         if (occupations == null) {
             throw new IllegalArgumentException(
-                    "La lista de oficios no puede ser nula"
+                    "Occupations list cannot be null"
             );
         }
         if (technicalSkills == null) {
             throw new IllegalArgumentException(
-                    "La lista de habilidades no puede ser nula"
+                    "Technical skills list cannot be null"
             );
         }
         return new AnalysisResult(occupations, technicalSkills);

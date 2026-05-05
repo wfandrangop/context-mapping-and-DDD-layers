@@ -4,9 +4,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Entidad que representa un trabajo pasado del trabajador.
- * Tiene identidad propia (ID) pero solo puede existir
- * dentro del agregado WorkerProfile.
+ * Past job entry owned by {@link WorkerProfile} with its own identity.
  */
 public final class WorkHistory {
 
@@ -24,10 +22,6 @@ public final class WorkHistory {
         this.endDate = range.end();
     }
 
-    /**
-     * Crea un registro de trabajo pasado validado.
-     * Lanza excepción si los campos obligatorios son inválidos.
-     */
     public static WorkHistory of(
             String clientOrCompany,
             String description,
@@ -41,13 +35,10 @@ public final class WorkHistory {
         return new WorkHistory(UUID.randomUUID().toString(), jobData, range);
     }
 
-    /**
-     * Devuelve una nueva instancia con la fecha de fin establecida.
-     */
     public WorkHistory withEndDate(LocalDate endDate) {
         if (endDate != null && endDate.isBefore(this.startDate)) {
             throw new IllegalArgumentException(
-                    "La fecha de fin no puede ser anterior a la de inicio"
+                    "End date cannot be before start date"
             );
         }
         JobData jobData = new JobData(this.clientOrCompany, this.description);
@@ -104,7 +95,7 @@ public final class WorkHistory {
     private static void validateClientOrCompany(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(
-                    "El cliente o empresa no puede estar vacío"
+                    "Client or company cannot be blank"
             );
         }
     }
@@ -112,7 +103,7 @@ public final class WorkHistory {
     private static void validateDescription(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(
-                    "La descripción del trabajo no puede estar vacía"
+                    "Job description cannot be blank"
             );
         }
     }
@@ -120,7 +111,7 @@ public final class WorkHistory {
     private static void validateStartDate(LocalDate value) {
         if (value == null) {
             throw new IllegalArgumentException(
-                    "La fecha de inicio no puede ser nula"
+                    "Start date cannot be null"
             );
         }
     }

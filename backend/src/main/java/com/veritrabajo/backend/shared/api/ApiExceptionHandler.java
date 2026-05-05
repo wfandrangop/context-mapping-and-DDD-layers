@@ -1,5 +1,6 @@
 package com.veritrabajo.backend.shared.api;
 
+import com.veritrabajo.backend.jobmarketplace.domain.exception.JobPostNotFoundException;
 import com.veritrabajo.backend.serviceexecution.domain.exception.ImageStorageException;
 import com.veritrabajo.backend.serviceexecution.domain.exception.ServiceExecutionNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ServiceExecutionNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(
             ServiceExecutionNotFoundException exception,
+            HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(JobPostNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleJobDemandNotFound(
+            JobPostNotFoundException exception,
             HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }

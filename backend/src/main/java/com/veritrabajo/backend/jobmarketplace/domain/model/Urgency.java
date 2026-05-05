@@ -1,4 +1,10 @@
 package com.veritrabajo.backend.jobmarketplace.domain.model;
 
-public class Urgency {
+/**
+ * Priority level for a job demand.
+ */
+public enum Urgency {
+    LOW,
+    MEDIUM,
+    IMMEDIATE
 }

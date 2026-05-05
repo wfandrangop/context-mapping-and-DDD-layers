@@ -3,35 +3,32 @@ package com.veritrabajo.backend.workerprofile.domain.repository;
 import com.veritrabajo.backend.workerprofile.domain.model.WorkerProfile;
 
 /**
- * Interfaz del repositorio definida en el dominio.
- * El dominio solo conoce este contrato, nunca los detalles
- * de JPA o la base de datos. La implementación real
- * vive en infrastructure/persistence/.
+ * Persistence port for {@link WorkerProfile}. Domain depends only on this contract;
+ * concrete adapters belong in infrastructure.
  */
 public interface WorkerProfileRepository {
 
     /**
-     * Guarda un perfil de trabajador en la base de datos.
+     * Persists (insert or update) a profile aggregate.
      *
-     * @param profile el perfil completo a persistir
-     * @return el perfil guardado con cualquier dato generado por la BD
+     * @param profile aggregate snapshot to store
+     * @return persisted aggregate (including generated columns if any)
      */
     WorkerProfile save(WorkerProfile profile);
 
     /**
-     * Busca un perfil por su identificador único.
+     * Loads a profile by id.
      *
-     * @param id el identificador del perfil
-     * @return el perfil encontrado o null si no existe
+     * @param id aggregate identifier
+     * @return matching profile or {@code null} when absent
      */
     WorkerProfile findById(String id);
 
     /**
-     * Verifica si ya existe un perfil con ese número de teléfono.
-     * Evita registros duplicados en el sistema.
+     * Checks whether a profile already exists for the phone number (duplicate guard).
      *
-     * @param phoneNumber el teléfono a verificar
-     * @return true si ya existe un perfil con ese teléfono
+     * @param phoneNumber normalized phone to check
+     * @return {@code true} when taken
      */
     boolean existsByPhoneNumber(String phoneNumber);
 }

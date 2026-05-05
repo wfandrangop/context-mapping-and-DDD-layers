@@ -6,17 +6,16 @@ import com.veritrabajo.backend.workerprofile.domain.model.RawDescription;
 import com.veritrabajo.backend.workerprofile.domain.model.TechnicalSkill;
 import com.veritrabajo.backend.workerprofile.domain.model.WorkerProfile;
 import com.veritrabajo.backend.workerprofile.domain.repository.WorkerProfileRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 /**
- * Implementación del repositorio del dominio usando JPA.
- * Traduce entre el modelo de dominio (WorkerProfile)
- * y la entidad de persistencia (WorkerProfileEntity).
- * El dominio nunca sabe que existe JPA.
+ * JPA-backed {@link WorkerProfileRepository} mapping aggregates to {@link WorkerProfileEntity}.
  */
 @Repository
+@Profile("!in-memory")
 public class JpaWorkerProfileRepository implements WorkerProfileRepository {
 
     private static final String OCCUPATION_DELIMITER = "\\|";
@@ -30,10 +29,6 @@ public class JpaWorkerProfileRepository implements WorkerProfileRepository {
         this.springRepository = springRepository;
     }
 
-    /**
-     * Convierte el dominio a entidad JPA y lo guarda en la BD.
-     * Luego convierte la entidad guardada de vuelta al dominio.
-     */
     @Override
     public WorkerProfile save(WorkerProfile profile) {
         WorkerProfileEntity entity = toEntity(profile);
@@ -41,10 +36,6 @@ public class JpaWorkerProfileRepository implements WorkerProfileRepository {
         return toDomain(saved);
     }
 
-    /**
-     * Busca por ID y convierte el resultado al modelo de dominio.
-     * Devuelve null si no existe para mantener contrato simple.
-     */
     @Override
     public WorkerProfile findById(String id) {
         return springRepository.findById(id)
@@ -52,17 +43,11 @@ public class JpaWorkerProfileRepository implements WorkerProfileRepository {
                 .orElse(null);
     }
 
-    /**
-     * Verifica si ya hay un perfil con ese teléfono en la BD.
-     */
     @Override
     public boolean existsByPhoneNumber(String phoneNumber) {
         return springRepository.existsByPhoneNumber(phoneNumber);
     }
 
-    /**
-     * Convierte el agregado de dominio a entidad JPA para persistir.
-     */
     private WorkerProfileEntity toEntity(WorkerProfile profile) {
         WorkerProfileEntity entity = new WorkerProfileEntity(
                 profile.getId(),
@@ -91,9 +76,6 @@ public class JpaWorkerProfileRepository implements WorkerProfileRepository {
                 .toList();
     }
 
-    /**
-     * Convierte la entidad JPA de vuelta al modelo de dominio.
-     */
     private WorkerProfile toDomain(WorkerProfileEntity entity) {
         WorkerProfile profile = WorkerProfile.create(
                 entity.getFullName(),
@@ -125,9 +107,6 @@ public class JpaWorkerProfileRepository implements WorkerProfileRepository {
         }
     }
 
-    /**
-     * Convierte string a ExpertiseLevel, con INTERMEDIATE por defecto.
-     */
     private ExpertiseLevel parseLevel(String levelStr) {
         try {
             return ExpertiseLevel.valueOf(levelStr);

@@ -3,9 +3,7 @@ package com.veritrabajo.backend.workerprofile.domain.event;
 import java.time.Instant;
 
 /**
- * Evento de dominio que se publica cuando un perfil de trabajador
- * ha sido procesado exitosamente por la IA y queda profesionalizado.
- * Otros contextos (ej: Reputation) pueden reaccionar a este evento.
+ * Raised after AI enrichment completes so other bounded contexts (e.g. reputation) can react.
  */
 public final class ProfileProfessionalized {
 
@@ -13,7 +11,6 @@ public final class ProfileProfessionalized {
     private final String fullName;
     private final Instant occurredAt;
 
-    // Constructor privado para forzar el uso del método factory
     private ProfileProfessionalized(
             String workerProfileId,
             String fullName
@@ -23,22 +20,18 @@ public final class ProfileProfessionalized {
         this.occurredAt = Instant.now();
     }
 
-    /**
-     * Crea el evento con los datos del perfil recién profesionalizado.
-     * Lanza excepción si el ID o nombre son inválidos.
-     */
     public static ProfileProfessionalized of(
             String workerProfileId,
             String fullName
     ) {
         if (workerProfileId == null || workerProfileId.isBlank()) {
             throw new IllegalArgumentException(
-                    "El ID del perfil no puede estar vacío"
+                    "Profile id cannot be blank"
             );
         }
         if (fullName == null || fullName.isBlank()) {
             throw new IllegalArgumentException(
-                    "El nombre del trabajador no puede estar vacío"
+                    "Worker full name cannot be blank"
             );
         }
         return new ProfileProfessionalized(workerProfileId, fullName);

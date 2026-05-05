@@ -1,8 +1,7 @@
 package com.veritrabajo.backend.workerprofile.domain.model;
 
 /**
- * Value Object que representa el texto libre ingresado por el trabajador
- * para describir su experiencia laboral. Es inmutable y no puede estar vacío.
+ * Immutable free-text experience narrative supplied by the worker (non-empty).
  */
 public final class RawDescription {
 
@@ -12,14 +11,10 @@ public final class RawDescription {
         this.text = text;
     }
 
-    /**
-     * Crea una instancia validada de RawDescription.
-     * Lanza excepción si el texto es nulo o vacío.
-     */
     public static RawDescription of(String text) {
         if (text == null || text.isBlank()) {
             throw new IllegalArgumentException(
-                    "La descripción no puede estar vacía"
+                    "Description cannot be blank"
             );
         }
         return new RawDescription(text.trim());

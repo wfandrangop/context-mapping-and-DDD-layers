@@ -5,9 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Value Object que representa el conjunto de herramientas
- * que el trabajador posee. Es inmutable: cualquier modificación
- * devuelve una nueva instancia.
+ * Immutable owned-tool set; updates return new instances.
  */
 public final class OwnedTools {
 
@@ -17,17 +15,11 @@ public final class OwnedTools {
         this.tools = Collections.unmodifiableSet(new HashSet<>(tools));
     }
 
-    /**
-     * Crea una lista de herramientas vacía.
-     */
     public static OwnedTools empty() {
         return new OwnedTools(new HashSet<>());
     }
 
-    /**
-     * Crea una lista de herramientas desde un conjunto existente.
-     * Filtra automáticamente valores nulos o vacíos.
-     */
+    /** Builds from raw strings, trimming and skipping blanks/nulls. */
     public static OwnedTools of(Set<String> tools) {
         if (tools == null) {
             return empty();
@@ -41,13 +33,10 @@ public final class OwnedTools {
         return new OwnedTools(cleanTools);
     }
 
-    /**
-     * Devuelve una nueva instancia con la herramienta agregada.
-     */
     public OwnedTools addTool(String toolName) {
         if (toolName == null || toolName.isBlank()) {
             throw new IllegalArgumentException(
-                    "El nombre de la herramienta no puede estar vacío"
+                    "Tool name cannot be blank"
             );
         }
         Set<String> updated = new HashSet<>(tools);
