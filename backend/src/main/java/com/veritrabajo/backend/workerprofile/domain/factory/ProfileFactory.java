@@ -11,10 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
- * Factory responsable de crear un WorkerProfile completo.
- * Orquesta la creación del agregado raíz, el análisis con IA
- * para extraer oficios y habilidades, y la publicación del evento
- * de dominio ProfileProfessionalized al finalizar.
+ * Builds a complete {@link WorkerProfile}: runs AI analysis for occupations/skills and publishes
+ * {@link ProfileProfessionalized}.
  */
 @Component
 public class ProfileFactory {
@@ -22,7 +20,6 @@ public class ProfileFactory {
     private final IAAnalysisService analysisService;
     private final ApplicationEventPublisher eventPublisher;
 
-    // Inyección por constructor (buena práctica en Spring)
     public ProfileFactory(
             IAAnalysisService analysisService,
             ApplicationEventPublisher eventPublisher
@@ -32,14 +29,11 @@ public class ProfileFactory {
     }
 
     /**
-     * Crea un WorkerProfile completo a partir de los datos básicos
-     * y el texto libre de la descripción del trabajador.
-     * La IA extrae automáticamente los oficios y habilidades técnicas.
+     * Creates and enriches a profile from identity fields plus free-text experience description.
      *
-     * @param fullName    nombre completo del trabajador
-     * @param phoneNumber teléfono de contacto
-     * @param rawText     descripción libre de su experiencia
-     * @return perfil del trabajador con oficios y habilidades identificados
+     * @param fullName    worker display name
+     * @param phoneNumber contact phone (unique at persistence layer)
+     * @param rawText     free-text experience narrative for AI extraction
      */
     public WorkerProfile createFromDescription(
             String fullName,

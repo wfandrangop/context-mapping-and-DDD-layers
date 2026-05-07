@@ -1,13 +1,10 @@
 package com.veritrabajo.backend.workerprofile.domain.model;
 
 /**
- * Value Object que representa un oficio del trabajador
- * junto con su nivel de expertise. Ej: ("Plomero", "Avanzado").
- * Un trabajador puede tener múltiples oficios.
+ * Trade plus expertise tier (e.g. plumber + ADVANCED). A worker may hold several occupations.
  */
 public final class Occupation {
 
-    // Niveles de expertise permitidos en el sistema
     public enum ExpertiseLevel {
         BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
     }
@@ -15,25 +12,20 @@ public final class Occupation {
     private final String tradeName;
     private final ExpertiseLevel level;
 
-    // Constructor privado para forzar el uso del método factory
     private Occupation(String tradeName, ExpertiseLevel level) {
         this.tradeName = tradeName;
         this.level = level;
     }
 
-    /**
-     * Crea un oficio validado con su nivel de expertise.
-     * Lanza excepción si el nombre es nulo o vacío.
-     */
     public static Occupation of(String tradeName, ExpertiseLevel level) {
         if (tradeName == null || tradeName.isBlank()) {
             throw new IllegalArgumentException(
-                    "El nombre del oficio no puede estar vacío"
+                    "Trade name cannot be blank"
             );
         }
         if (level == null) {
             throw new IllegalArgumentException(
-                    "El nivel de expertise no puede ser nulo"
+                    "Expertise level cannot be null"
             );
         }
         return new Occupation(tradeName.trim(), level);

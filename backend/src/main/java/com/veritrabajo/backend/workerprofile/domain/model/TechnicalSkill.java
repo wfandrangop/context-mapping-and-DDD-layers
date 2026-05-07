@@ -1,9 +1,7 @@
 package com.veritrabajo.backend.workerprofile.domain.model;
 
 /**
- * Value Object que representa una habilidad técnica específica
- * extraída automáticamente por la IA desde la descripción del trabajador.
- * Ej: "Soldadura de cobre", "Instalación de drywall".
+ * Single technical skill inferred from unstructured text (e.g. copper soldering).
  */
 public final class TechnicalSkill {
 
@@ -13,14 +11,10 @@ public final class TechnicalSkill {
         this.skillName = skillName;
     }
 
-    /**
-     * Crea una habilidad técnica validada.
-     * Lanza excepción si el nombre es nulo o vacío.
-     */
     public static TechnicalSkill of(String skillName) {
         if (skillName == null || skillName.isBlank()) {
             throw new IllegalArgumentException(
-                    "El nombre de la habilidad no puede estar vacío"
+                    "Skill name cannot be blank"
             );
         }
         return new TechnicalSkill(skillName.trim());

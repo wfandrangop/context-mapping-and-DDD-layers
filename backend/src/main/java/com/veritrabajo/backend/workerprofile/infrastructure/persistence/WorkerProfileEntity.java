@@ -13,9 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Entidad JPA que mapea el WorkerProfile a la base de datos.
- * Vive en infrastructure para no contaminar el dominio
- * con anotaciones de persistencia.
+ * JPA mapping for worker profiles (infrastructure concern; keeps persistence annotations out
+ * of domain).
  */
 @Entity
 @Table(name = "worker_profiles")

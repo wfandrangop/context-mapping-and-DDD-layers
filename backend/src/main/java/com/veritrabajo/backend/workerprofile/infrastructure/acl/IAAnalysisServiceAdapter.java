@@ -16,35 +16,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Adaptador ACL (Anti-Corruption Layer) que implementa IAAnalysisService
- * conectándose a la API de Google Gemini.
- * Traduce la respuesta externa al modelo de dominio sin contaminarlo.
- * La API key se lee desde variables de entorno o application.properties.
+ * Anti-corruption layer for {@link IAAnalysisService} using Google Gemini.
+ * Maps the remote JSON payload into domain objects without leaking infra types upward.
  */
 @Component
 public class IAAnalysisServiceAdapter implements IAAnalysisService {
 
-    // URL base de la API de Gemini
     private static final String GEMINI_URL =
             "https://generativelanguage.googleapis.com/v1beta/models/"
                     + "gemini-2.0-flash:generateContent";
 
-    // Prompt que le enviamos a Gemini para extraer skills del texto
     private static final String ANALYSIS_PROMPT =
-            "Analiza el siguiente texto de experiencia laboral y responde "
-                    + "ÚNICAMENTE con un JSON válido con esta estructura exacta:\n"
+            "Analyze the following work experience text and respond ONLY with valid JSON "
+                    + "using exactly this shape:\n"
                     + "{\n"
                     + "  \"occupations\": [{\"tradeName\": \"string\", "
                     + "\"level\": \"BEGINNER|INTERMEDIATE|ADVANCED|EXPERT\"}],\n"
                     + "  \"technicalSkills\": [\"string\"]\n"
                     + "}\n"
-                    + "Texto a analizar:\n";
+                    + "Text to analyze:\n";
 
     private final String apiKey;
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
-    // La API key se inyecta desde application.properties o variable de entorno
     public IAAnalysisServiceAdapter(
             @Value("${gemini.api.key:NOT_CONFIGURED}") String apiKey,
             RestClient.Builder restClientBuilder
@@ -54,10 +49,6 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * Llama a Gemini con la descripción del trabajador
-     * y parsea la respuesta JSON para extraer oficios y habilidades.
-     */
     @Override
     public AnalysisResult analyze(RawDescription description) {
         validateApiKey();
@@ -68,21 +59,15 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
         return parseGeminiResponse(rawResponse);
     }
 
-    /**
-     * Verifica que la API key esté configurada antes de llamar a Gemini.
-     */
     private void validateApiKey() {
-        if ("NOT_CONFIGURED".equals(apiKey)) {
+        if ("NOT_CONFIGURED".equals(apiKey) || apiKey.trim().isEmpty()) {
             throw new IllegalStateException(
-                    "La API key de Gemini no está configurada. "
-                            + "Agrega 'gemini.api.key=TU_KEY' en application.properties"
+                    "Gemini API key is not configured. "
+                            + "Set 'gemini.api.key=YOUR_KEY' in application.properties"
             );
         }
     }
 
-    /**
-     * Construye el body JSON que espera la API de Gemini.
-     */
     private String buildRequestBody(String workerText) {
         String promptText = ANALYSIS_PROMPT + workerText;
         return "{"
@@ -94,9 +79,6 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
                 + "}";
     }
 
-    /**
-     * Realiza la llamada HTTP a la API de Google Gemini.
-     */
     private String callGeminiApi(String requestBody) {
         return restClient.post()
                 .uri(GEMINI_URL + "?key=" + apiKey)
@@ -106,10 +88,6 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
                 .body(String.class);
     }
 
-    /**
-     * Parsea la respuesta de Gemini y construye el AnalysisResult
-     * con los oficios y habilidades extraídos.
-     */
     private AnalysisResult parseGeminiResponse(String rawResponse) {
         try {
             JsonNode parsed = extractInnerJson(rawResponse);
@@ -136,9 +114,6 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
         return objectMapper.readTree(cleanJson);
     }
 
-    /**
-     * Extrae la lista de oficios desde el JSON parseado de Gemini.
-     */
     private List<Occupation> extractOccupations(JsonNode parsed) {
         List<Occupation> occupations = new ArrayList<>();
         JsonNode occupationsNode = parsed.path("occupations");
@@ -155,9 +130,6 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
         return occupations;
     }
 
-    /**
-     * Extrae la lista de habilidades técnicas desde el JSON de Gemini.
-     */
     private List<TechnicalSkill> extractSkills(JsonNode parsed) {
         List<TechnicalSkill> skills = new ArrayList<>();
         JsonNode skillsNode = parsed.path("technicalSkills");
@@ -172,8 +144,7 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
     }
 
     /**
-     * Convierte el string del nivel al enum ExpertiseLevel.
-     * Si no reconoce el valor, devuelve INTERMEDIATE por defecto.
+     * Parses Gemini level strings; unknown values fall back to {@link ExpertiseLevel#INTERMEDIATE}.
      */
     private ExpertiseLevel parseLevel(String levelStr) {
         try {
@@ -183,9 +154,6 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
         }
     }
 
-    /**
-     * Escapa caracteres especiales para que el texto sea JSON válido.
-     */
     private String escapeJson(String text) {
         return text
                 .replace("\\", "\\\\")

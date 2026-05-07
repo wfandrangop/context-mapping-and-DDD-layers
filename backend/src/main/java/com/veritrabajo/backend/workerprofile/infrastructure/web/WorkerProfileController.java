@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controlador REST que expone el endpoint de registro de trabajadores.
- * Solo recibe la petición HTTP, delega al ApplicationService
- * y devuelve la respuesta. No contiene lógica de negocio.
+ * REST adapter for worker registration.
+ * Delegates to {@link WorkerProfileApplicationService}; domain rules stay outside the web layer.
  */
 @RestController
 @RequestMapping("/api/profiles")
@@ -28,25 +27,17 @@ public class WorkerProfileController {
     }
 
     /**
-     * Registra un nuevo trabajador en el sistema.
-     * Recibe los datos del formulario de registro del frontend.
-     * Devuelve 201 CREATED con mensaje de éxito si todo va bien.
-     * Devuelve 400 BAD REQUEST si los datos son inválidos o duplicados.
+     * Registers a worker from the client payload.
      *
-     * POST /api/profiles
+     * <p>{@code 201 Created} on success; {@code 400} for invalid input; {@code 409} for conflicts
+     * (e.g. duplicate phone), handled by
+     * {@link com.veritrabajo.backend.shared.api.ApiExceptionHandler}.
      */
     @PostMapping
     public ResponseEntity<RegisterWorkerResponse> registerWorker(
             @RequestBody RegisterWorkerRequest request
     ) {
-        try {
-            RegisterWorkerResponse response =
-                    applicationService.registerWorker(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        RegisterWorkerResponse response = applicationService.registerWorker(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Aggregate root del contexto WorkerProfile.
- * Controla y protege el acceso a las entidades y value objects
- * dentro de este contexto. Nadie puede modificar sus colecciones
- * directamente; toda mutación pasa por sus métodos.
+ * WorkerProfile aggregate root: all mutations go through these methods.
  */
 public final class WorkerProfile {
 
@@ -33,53 +30,45 @@ public final class WorkerProfile {
     }
 
     /**
-     * Crea un perfil básico con nombre y teléfono.
-     * Punto de entrada usado por la ProfileFactory.
+     * Factory entry used by
+     * {@link com.veritrabajo.backend.workerprofile.domain.factory.ProfileFactory}.
      */
     public static WorkerProfile create(String fullName, String phoneNumber) {
-        requireNonBlank(fullName, "El nombre completo no puede estar vacío");
-        requireNonBlank(phoneNumber, "El teléfono no puede estar vacío");
+        requireNonBlank(fullName, "Full name cannot be blank");
+        requireNonBlank(phoneNumber, "Phone number cannot be blank");
         return new WorkerProfile(fullName.trim(), phoneNumber.trim());
     }
 
-    /**
-     * Asigna la descripción bruta del trabajador.
-     * Solo puede asignarse una vez.
-     */
+    /** Assigns raw description text exactly once. */
     public void assignRawDescription(RawDescription description) {
         if (this.rawDescription != null) {
             throw new IllegalStateException(
-                    "La descripción ya fue asignada a este perfil"
+                    "Raw description was already assigned to this profile"
             );
         }
         this.rawDescription = description;
     }
 
-    /**
-     * Agrega un oficio al perfil. No permite duplicados.
-     */
+    /** Adds an occupation; rejects nulls and duplicates. */
     public void addOccupation(Occupation occupation) {
         if (occupation == null) {
             throw new IllegalArgumentException(
-                    "El oficio no puede ser nulo"
+                    "Occupation cannot be null"
             );
         }
         if (occupations.contains(occupation)) {
             throw new IllegalArgumentException(
-                    "El oficio ya existe en el perfil: " + occupation.getTradeName()
+                    "Occupation already present on profile: " + occupation.getTradeName()
             );
         }
         occupations.add(occupation);
     }
 
-    /**
-     * Agrega una habilidad técnica extraída por la IA.
-     * Ignora silenciosamente duplicados.
-     */
+    /** Adds a technical skill inferred externally; ignores duplicates. */
     public void addTechnicalSkill(TechnicalSkill skill) {
         if (skill == null) {
             throw new IllegalArgumentException(
-                    "La habilidad técnica no puede ser nula"
+                    "Technical skill cannot be null"
             );
         }
         if (technicalSkills.contains(skill)) {
@@ -88,25 +77,19 @@ public final class WorkerProfile {
         technicalSkills.add(skill);
     }
 
-    /**
-     * Agrega un registro de trabajo pasado al historial.
-     */
     public void addWorkHistory(WorkHistory history) {
         if (history == null) {
             throw new IllegalArgumentException(
-                    "El historial de trabajo no puede ser nulo"
+                    "Work history cannot be null"
             );
         }
         workHistories.add(history);
     }
 
-    /**
-     * Reemplaza las herramientas propias del trabajador.
-     */
     public void updateOwnedTools(OwnedTools tools) {
         if (tools == null) {
             throw new IllegalArgumentException(
-                    "Las herramientas propias no pueden ser nulas"
+                    "Owned tools cannot be null"
             );
         }
         this.ownedTools = tools;

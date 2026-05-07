@@ -1,30 +1,27 @@
 package com.veritrabajo.backend.workerprofile.application.dto;
 
 /**
- * DTO de respuesta que el endpoint devuelve al frontend
- * cuando el registro del trabajador fue exitoso.
- * Contiene solo el mensaje de éxito y el ID generado.
+ * Response returned after a successful worker registration (success message and generated profile
+ * id).
  */
 public class RegisterWorkerResponse {
 
     private final String message;
     private final String profileId;
 
-    // Constructor privado para forzar el uso del método factory
     private RegisterWorkerResponse(String message, String profileId) {
         this.message = message;
         this.profileId = profileId;
     }
 
     /**
-     * Crea una respuesta de registro exitoso.
+     * Builds a success response for the given persisted profile id.
      *
-     * @param profileId el ID del perfil recién creado
-     * @return respuesta con mensaje de éxito
+     * @param profileId identifier assigned to the new profile
      */
     public static RegisterWorkerResponse success(String profileId) {
         return new RegisterWorkerResponse(
-                "Perfil registrado exitosamente",
+                "Profile registered successfully",
                 profileId
         );
     }
