@@ -6,7 +6,6 @@ import com.veritrabajo.backend.workerprofile.domain.model.RawDescription;
 import com.veritrabajo.backend.workerprofile.domain.model.TechnicalSkill;
 import com.veritrabajo.backend.workerprofile.domain.model.WorkerProfile;
 import com.veritrabajo.backend.workerprofile.domain.repository.WorkerProfileRepository;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.List;
  * JPA-backed {@link WorkerProfileRepository} mapping aggregates to {@link WorkerProfileEntity}.
  */
 @Repository
-@Profile("!in-memory")
 public class JpaWorkerProfileRepository implements WorkerProfileRepository {
 
     private static final String OCCUPATION_DELIMITER = "\\|";

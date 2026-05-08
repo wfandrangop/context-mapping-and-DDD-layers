@@ -3,7 +3,6 @@ package com.veritrabajo.backend.serviceexecution.infrastructure.persistence;
 import com.veritrabajo.backend.serviceexecution.domain.model.ServiceExecution;
 import com.veritrabajo.backend.serviceexecution.domain.port.ServiceExecutionRepository;
 import com.veritrabajo.backend.serviceexecution.infrastructure.persistence.entity.ServiceExecutionEntity;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.UUID;
  * JPA-backed implementation of service execution repository.
  */
 @Repository
-@Profile("!in-memory")
 public class JpaServiceExecutionRepository implements ServiceExecutionRepository {
 
     private final SpringDataServiceExecutionRepository jpaRepository;

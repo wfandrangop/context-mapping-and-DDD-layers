@@ -16,15 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Anti-corruption layer for {@link IAAnalysisService} using Google Gemini.
+ * Anti-corruption layer for {@link IAAnalysisService} using Groq LLM.
  * Maps the remote JSON payload into domain objects without leaking infra types upward.
  */
 @Component
 public class IAAnalysisServiceAdapter implements IAAnalysisService {
 
-    private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-                    + "gemini-2.0-flash:generateContent";
+    private static final String DEFAULT_BASE_URL = "https://api.groq.com/openai";
+    private static final String DEFAULT_MODEL = "llama3-70b-8192";
 
     private static final String ANALYSIS_PROMPT =
             "Analyze the following work experience text and respond ONLY with valid JSON "
@@ -41,7 +40,7 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
     private final ObjectMapper objectMapper;
 
     public IAAnalysisServiceAdapter(
-            @Value("${gemini.api.key:NOT_CONFIGURED}") String apiKey,
+            @Value("${spring.ai.openai.api-key:NOT_CONFIGURED}") String apiKey,
             RestClient.Builder restClientBuilder
     ) {
         this.apiKey = apiKey;
@@ -51,46 +50,45 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
 
     @Override
     public AnalysisResult analyze(RawDescription description) {
-        validateApiKey();
-
-        String requestBody = buildRequestBody(description.getText());
-        String rawResponse = callGeminiApi(requestBody);
-
-        return parseGeminiResponse(rawResponse);
-    }
-
-    private void validateApiKey() {
-        if ("NOT_CONFIGURED".equals(apiKey) || apiKey.trim().isEmpty()) {
-            throw new IllegalStateException(
-                    "Gemini API key is not configured. "
-                            + "Set 'gemini.api.key=YOUR_KEY' in application.properties"
-            );
+        try {
+            String prompt = buildPrompt(description.getText());
+            String modelResponse = callGroq(prompt);
+            return parseModelResponse(modelResponse);
+        } catch (Exception exception) {
+            // External AI can fail (quota, connectivity, provider errors).
+            // keep registration flow alive with empty AI enrichment.
+            return AnalysisResult.of(new ArrayList<>(), new ArrayList<>());
         }
     }
 
-    private String buildRequestBody(String workerText) {
-        String promptText = ANALYSIS_PROMPT + workerText;
-        return "{"
-                + "\"contents\": [{"
-                + "\"parts\": [{\"text\": \""
-                + escapeJson(promptText)
-                + "\"}]"
-                + "}]"
-                + "}";
+    private String buildPrompt(String workerText) {
+        return ANALYSIS_PROMPT + workerText;
     }
 
-    private String callGeminiApi(String requestBody) {
-        return restClient.post()
-                .uri(GEMINI_URL + "?key=" + apiKey)
+    private String callGroq(String prompt) {
+        String requestBody = "{"
+                + "\"model\":\"" + escapeJson(DEFAULT_MODEL) + "\","
+                + "\"messages\":["
+                + "{\"role\":\"system\",\"content\":\"You are an information extraction assistant. "
+                + "Always return only valid JSON with no markdown.\"},"
+                + "{\"role\":\"user\",\"content\":\"" + escapeJson(prompt) + "\"}"
+                + "]"
+                + "}";
+
+        String rawResponse = restClient.post()
+                .uri(DEFAULT_BASE_URL + "/v1/chat/completions")
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .body(requestBody)
                 .retrieve()
                 .body(String.class);
+
+        return extractChatContent(rawResponse);
     }
 
-    private AnalysisResult parseGeminiResponse(String rawResponse) {
+    private AnalysisResult parseModelResponse(String modelResponse) {
         try {
-            JsonNode parsed = extractInnerJson(rawResponse);
+            JsonNode parsed = extractJson(modelResponse);
             List<Occupation> occupations = extractOccupations(parsed);
             List<TechnicalSkill> skills = extractSkills(parsed);
             return AnalysisResult.of(occupations, skills);
@@ -99,19 +97,25 @@ public class IAAnalysisServiceAdapter implements IAAnalysisService {
         }
     }
 
-    private JsonNode extractInnerJson(String rawResponse) throws Exception {
-        JsonNode root = objectMapper.readTree(rawResponse);
-        String jsonText = root
-                .path("candidates").get(0)
-                .path("content")
-                .path("parts").get(0)
-                .path("text")
-                .asText();
-        String cleanJson = jsonText
+    private JsonNode extractJson(String modelResponse) throws Exception {
+        String cleanJson = modelResponse
                 .replaceAll("```json", "")
                 .replaceAll("```", "")
                 .trim();
         return objectMapper.readTree(cleanJson);
+    }
+
+    private String extractChatContent(String rawResponse) {
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("choices")
+                    .get(0)
+                    .path("message")
+                    .path("content")
+                    .asText();
+        } catch (Exception exception) {
+            return "";
+        }
     }
 
     private List<Occupation> extractOccupations(JsonNode parsed) {

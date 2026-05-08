@@ -3,7 +3,6 @@ package com.veritrabajo.backend.customer.infrastructure.persistence;
 import com.veritrabajo.backend.customer.domain.model.Customer;
 import com.veritrabajo.backend.customer.domain.port.CustomerRepository;
 import com.veritrabajo.backend.customer.infrastructure.persistence.entity.CustomerEntity;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,7 +12,6 @@ import java.util.UUID;
  * JPA-backed repository implementation for Customer aggregate persistence.
  */
 @Repository
-@Profile("!in-memory")
 public class JpaCustomerRepository implements CustomerRepository {
 
     private final SpringDataCustomerRepository springDataRepository;

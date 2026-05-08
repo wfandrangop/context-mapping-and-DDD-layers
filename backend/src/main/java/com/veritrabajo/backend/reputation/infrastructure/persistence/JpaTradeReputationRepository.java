@@ -3,7 +3,6 @@ package com.veritrabajo.backend.reputation.infrastructure.persistence;
 import com.veritrabajo.backend.reputation.domain.model.TradeReputation;
 import com.veritrabajo.backend.reputation.domain.port.TradeReputationRepository;
 import com.veritrabajo.backend.reputation.infrastructure.persistence.entity.TradeReputationEntity;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,7 +16,6 @@ import java.util.Optional;
  * {@code in-memory} profile is explicitly set.
  */
 @Repository
-@Profile("!in-memory")
 public class JpaTradeReputationRepository
         implements TradeReputationRepository {
 
