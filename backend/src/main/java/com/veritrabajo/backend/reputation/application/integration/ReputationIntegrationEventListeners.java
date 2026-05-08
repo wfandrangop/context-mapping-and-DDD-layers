@@ -4,6 +4,8 @@ import com.veritrabajo.backend.reputation.application.ReputationApplicationServi
 import com.veritrabajo.backend.shared.contract.serviceexecution.ServiceExecutionCompleted;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Adapter that listens for integration events emitted by upstream
@@ -25,10 +27,14 @@ public class ReputationIntegrationEventListeners {
 
     /**
      * Reacts to a service execution being completed upstream.
+     * <p>
+     * Processed only after the upstream transaction commits, so a failure
+     * here cannot revert a valid execution finalization (Partnership pattern).
      *
      * @param event the integration event carrying execution details
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT,
+            fallbackExecution = true)
     public void onServiceExecutionCompleted(
             ServiceExecutionCompleted event) {
         applicationService.processServiceCompletion(event);

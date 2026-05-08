@@ -12,6 +12,8 @@ import com.veritrabajo.backend.reputation.domain.port.TradeReputationRepository;
 import com.veritrabajo.backend.reputation.domain.service.ReputationCalculator;
 import com.veritrabajo.backend.shared.contract.serviceexecution.ServiceExecutionCompleted;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +33,7 @@ public class ReputationApplicationService {
         this.eventPublisher = eventPublisher;
     }
 
+    @Transactional
     public TradeReputation createIfNotExists(String profileId) {
         return repository
                 .findByProfileId(profileId)
@@ -38,10 +41,12 @@ public class ReputationApplicationService {
                         TradeReputation.createInitial(profileId)));
     }
 
+    @Transactional(readOnly = true)
     public Optional<TradeReputation> getByProfileId(String profileId) {
         return repository.findByProfileId(profileId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processServiceCompletion(ServiceExecutionCompleted event) {
         TradeReputation reputation = createIfNotExists(event.profileId());
 
@@ -52,6 +57,7 @@ public class ReputationApplicationService {
         repository.save(reputation);
     }
 
+    @Transactional
     public void recalculateReputation(String profileId) {
         TradeReputation reputation = repository.findByProfileId(profileId)
                 .orElseThrow(() -> new IllegalArgumentException(

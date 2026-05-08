@@ -10,11 +10,15 @@ import com.veritrabajo.backend.serviceexecution.domain.port.ImageStoragePort;
 import com.veritrabajo.backend.serviceexecution.domain.port.ServiceExecutionRepository;
 import com.veritrabajo.backend.shared.contract.serviceexecution.ServiceExecutionCompleted;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
 public class ServiceExecutionApplicationService {
+
+    private static final int MIN_RATING = 1;
+    private static final int MAX_RATING = 5;
 
     private final ServiceExecutionRepository repository;
     private final ImageStoragePort imageStoragePort;
@@ -29,10 +33,12 @@ public class ServiceExecutionApplicationService {
         this.eventPublisher = eventPublisher;
     }
 
+    @Transactional
     public ServiceExecution createExecution(String clientId, String workerId) {
         return repository.save(ServiceExecution.create(clientId, workerId));
     }
 
+    @Transactional
     public ServiceExecution beginExecution(UUID id) {
         ServiceExecution execution = findOrThrow(id);
         ServiceExecutionStarted event = execution.begin();
@@ -41,6 +47,7 @@ public class ServiceExecutionApplicationService {
         return saved;
     }
 
+    @Transactional
     public ServiceExecution addPhoto(UUID id, String filename, byte[] content) {
         ServiceExecution execution = findOrThrow(id);
         String url = imageStoragePort.store(filename, content);
@@ -48,7 +55,9 @@ public class ServiceExecutionApplicationService {
         return repository.save(execution);
     }
 
+    @Transactional
     public ServiceExecution completeExecution(UUID id, int clientRating, String clientComment) {
+        validateClientFeedback(clientRating, clientComment);
         ServiceExecution execution = findOrThrow(id);
         ServiceExecutionFinalized event = execution.complete();
         ServiceExecution saved = repository.save(execution);
@@ -59,6 +68,17 @@ public class ServiceExecutionApplicationService {
 
     public ServiceExecution findExecution(UUID id) {
         return findOrThrow(id);
+    }
+
+    private static void validateClientFeedback(int clientRating, String clientComment) {
+        if (clientRating < MIN_RATING || clientRating > MAX_RATING) {
+            throw new IllegalArgumentException(
+                    String.format("Client rating must be between %d and %d, got %d",
+                            MIN_RATING, MAX_RATING, clientRating));
+        }
+        if (clientComment == null || clientComment.isBlank()) {
+            throw new IllegalArgumentException("Client comment is required");
+        }
     }
 
     private ServiceExecutionCompleted buildPartnershipEvent(
