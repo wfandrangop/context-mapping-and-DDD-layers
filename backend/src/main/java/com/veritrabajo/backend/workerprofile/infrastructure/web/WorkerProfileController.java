@@ -7,6 +7,7 @@ import com.veritrabajo.backend.workerprofile.application.dto.WorkerProfileRespon
 import com.veritrabajo.backend.workerprofile.domain.model.AuthUserId;
 import com.veritrabajo.backend.workerprofile.domain.model.WorkerProfile;
 import com.veritrabajo.backend.workerprofile.domain.port.AuthenticatedIdentityProvider;
+import com.veritrabajo.backend.workerprofile.domain.port.ReputationProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +22,16 @@ public class WorkerProfileController {
 
     private final WorkerProfileApplicationService applicationService;
     private final AuthenticatedIdentityProvider identityProvider;
+    private final ReputationProvider reputationProvider;
 
     public WorkerProfileController(
             WorkerProfileApplicationService applicationService,
-            AuthenticatedIdentityProvider identityProvider
+            AuthenticatedIdentityProvider identityProvider,
+            ReputationProvider reputationProvider
     ) {
         this.applicationService = applicationService;
         this.identityProvider = identityProvider;
+        this.reputationProvider = reputationProvider;
     }
 
     @PostMapping
@@ -43,6 +47,7 @@ public class WorkerProfileController {
     public ResponseEntity<WorkerProfileResponse> getMyProfile() {
         AuthUserId authUserId = identityProvider.currentAuthUserId();
         WorkerProfile profile = applicationService.getByAuthUserId(authUserId);
-        return ResponseEntity.ok(WorkerProfileResponse.from(profile));
+        int score = reputationProvider.confidenceScore(profile.getId().asString());
+        return ResponseEntity.ok(WorkerProfileResponse.from(profile, score));
     }
 }
