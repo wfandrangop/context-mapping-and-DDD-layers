@@ -1,0 +1,73 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: veritrabajo-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_PROXY_TARGET=http://backend:8080
+    stdin_open: true
+    tty: true
+    networks:
+      - veritrabajo-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: veritrabajo-postgres
+    environment:
+      - POSTGRES_DB=veritrabajo
+      - POSTGRES_USER=veritrabajo
+      - POSTGRES_PASSWORD=veritrabajo
+    ports:
+      - "5432:5432"
+    volumes:
+      - veritrabajo-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veritrabajo -d veritrabajo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - veritrabajo-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: veritrabajo-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - veritrabajo-backend-uploads:/app/uploads
+    environment:
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/veritrabajo
+      - SPRING_DATASOURCE_USERNAME=veritrabajo
+      - SPRING_DATASOURCE_PASSWORD=veritrabajo
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=false
+      - SPRING_AI_OPENAI_API_KEY=${SPRING_AI_OPENAI_API_KEY:-dev-placeholder}
+      - SPRING_AI_OPENAI_BASE_URL=https://api.groq.com/openai
+      - SPRING_AI_OPENAI_CHAT_OPTIONS_MODEL=llama-3.1-8b-instant
+      - SPRING_AI_OPENAI_CHAT_OPTIONS_TEMPERATURE=0.7
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - veritrabajo-network
+
+networks:
+  veritrabajo-network:
+    driver: bridge
+
+volumes:
+  veritrabajo-postgres-data:
+  veritrabajo-backend-uploads:
