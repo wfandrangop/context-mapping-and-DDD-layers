@@ -1,0 +1,11 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Puedes agregar estilos globales aquí si quieres */
+@layer base {
+  body {
+    @apply bg-[#F4F7F6];
+  }
+}
